@@ -1,3 +1,4 @@
+// Package main is the entry point for the CLI application.
 package main
 
 import (
@@ -20,3 +21,4 @@ func main() {
 		os.Exit(1)
 	}
 }
+

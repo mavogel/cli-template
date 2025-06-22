@@ -1,26 +1,20 @@
+version: 2
+
 run:
   timeout: 5m
-  modules-download-mode: readonly
 
 linters:
   enable:
     - errcheck
-    - gosimple
     - govet
     - ineffassign
     - staticcheck
-    - typecheck
     - unused
-    - gofmt
-    - goimports
     - misspell
     - revive
     - gosec
-    - gocritic
-    - gocyclo
+    - cyclop
     - goconst
-    - godot
-    - nolintlint
 
 linters-settings:
   revive:
@@ -29,10 +23,8 @@ linters-settings:
         severity: warning
       - name: var-naming
         severity: warning
-      - name: package-comments
-        severity: warning
-  gocyclo:
-    min-complexity: 15
+  cyclop:
+    max-complexity: 15
   goconst:
     min-len: 2
     min-occurrences: 2

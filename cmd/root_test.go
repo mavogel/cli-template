@@ -25,3 +25,4 @@ func TestRootCommand(t *testing.T) {
 		})
 	}
 }
+

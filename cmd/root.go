@@ -22,7 +22,7 @@ var rootCmd = &cobra.Command{
 	Use:   "cli-template",
 	Short: "A CLI application template",
 	Long:  `A CLI application template built with Go and Cobra for rapid development.`,
-	Run: func(cmd *cobra.Command, args []string) {
+	Run: func(cmd *cobra.Command, _ []string) {
 		if version, _ := cmd.Flags().GetBool("version"); version {
 			fmt.Printf("cli-template %s\n", versionInfo.version)
 			fmt.Printf("commit: %s\n", versionInfo.commit)
@@ -34,10 +34,12 @@ var rootCmd = &cobra.Command{
 	},
 }
 
+// Execute runs the root command and returns any error.
 func Execute() error {
 	return rootCmd.Execute()
 }
 
+// SetVersionInfo sets the version information for the application.
 func SetVersionInfo(version, commit, date string) {
 	versionInfo.version = version
 	versionInfo.commit = commit
@@ -47,3 +49,4 @@ func SetVersionInfo(version, commit, date string) {
 func init() {
 	rootCmd.Flags().BoolP("version", "v", false, "Print version information")
 }
+

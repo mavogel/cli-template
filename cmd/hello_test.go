@@ -33,24 +33,24 @@ func TestHelloCommand(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			buf := new(bytes.Buffer)
-			
+
 			cmd := &cobra.Command{
 				Use:   "hello",
 				Short: "Print a greeting message",
 				Long:  `Print a greeting message with optional name parameter.`,
-				Run: func(cmd *cobra.Command, args []string) {
+				Run: func(cmd *cobra.Command, _ []string) {
 					name, _ := cmd.Flags().GetString("name")
 					if name == "" {
-						name = "World"
+						name = defaultName
 					}
 					cmd.Printf("Hello, %s!\n", name)
 				},
 			}
 			cmd.Flags().StringP("name", "n", "", "Name to greet")
-			
+
 			cmd.SetOut(buf)
 			cmd.SetArgs(tt.args)
-			
+
 			err := cmd.Execute()
 			if err != nil {
 				t.Errorf("Execute() error = %v", err)
@@ -63,3 +63,4 @@ func TestHelloCommand(t *testing.T) {
 		})
 	}
 }
+
