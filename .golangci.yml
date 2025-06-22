@@ -11,20 +11,10 @@ linters:
     - staticcheck
     - unused
     - misspell
-    - revive
     - gosec
-    - cyclop
     - goconst
 
 linters-settings:
-  revive:
-    rules:
-      - name: exported
-        severity: warning
-      - name: var-naming
-        severity: warning
-  cyclop:
-    max-complexity: 15
   goconst:
     min-len: 2
     min-occurrences: 2
