@@ -1,4 +1,4 @@
-version: 1
+version: 2
 
 before:
   hooks:
@@ -24,23 +24,19 @@ builds:
       - -s -w -X main.version={{.Version}} -X main.commit={{.Commit}} -X main.date={{.Date}}
 
 archives:
-  - format: tar.gz
-    name_template: >-
+  - name_template: >-
       {{ .ProjectName }}_
       {{- title .Os }}_
       {{- if eq .Arch "amd64" }}x86_64
       {{- else if eq .Arch "386" }}i386
       {{- else }}{{ .Arch }}{{ end }}
       {{- if .Arm }}v{{ .Arm }}{{ end }}
-    format_overrides:
-      - goos: windows
-        format: zip
 
 checksum:
   name_template: 'checksums.txt'
 
 snapshot:
-  name_template: "{{ incpatch .Version }}-next"
+  version_template: "{{ incpatch .Version }}-next"
 
 changelog:
   sort: asc
@@ -74,16 +70,4 @@ release:
     
     Welcome to this new release!
 
-brews:
-  - name: cli-template
-    description: "A CLI application template"
-    homepage: "https://github.com/mavogel/cli-template"
-    repository:
-      owner: mavogel
-      name: homebrew-tap
-      branch: main
-    test: |
-      system "#{bin}/cli-template --help"
-    install: |
-      bin.install "cli-template"
 
