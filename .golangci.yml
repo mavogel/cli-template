@@ -24,7 +24,13 @@ linters:
 
 linters-settings:
   revive:
-    min-confidence: 0
+    rules:
+      - name: exported
+        severity: warning
+      - name: var-naming
+        severity: warning
+      - name: package-comments
+        severity: warning
   gocyclo:
     min-complexity: 15
   goconst:
