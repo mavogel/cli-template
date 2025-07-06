@@ -1,12 +1,69 @@
 package cmd
 
 import (
+	"bytes"
 	"io"
 	"os"
 	"testing"
 
 	"github.com/spf13/cobra"
 )
+
+// TestHelloAction tests the HelloAction function directly
+func TestHelloAction(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    string
+		expected string
+		wantErr  bool
+	}{
+		{
+			name:     "default name",
+			input:    "",
+			expected: "Hello, World!\n",
+			wantErr:  false,
+		},
+		{
+			name:     "custom name",
+			input:    "Alice",
+			expected: "Hello, Alice!\n",
+			wantErr:  false,
+		},
+		{
+			name:     "name with spaces",
+			input:    "John Doe",
+			expected: "Hello, John Doe!\n",
+			wantErr:  false,
+		},
+		{
+			name:     "name with special characters",
+			input:    "User@123",
+			expected: "Hello, User@123!\n",
+			wantErr:  false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// Create a buffer to capture output
+			buf := &bytes.Buffer{}
+			
+			// Call the function
+			err := HelloAction(tt.input, buf)
+			
+			// Check error
+			if (err != nil) != tt.wantErr {
+				t.Errorf("HelloAction() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			
+			// Check output
+			if got := buf.String(); got != tt.expected {
+				t.Errorf("HelloAction() output = %q, want %q", got, tt.expected)
+			}
+		})
+	}
+}
 
 func TestHelloCommand(t *testing.T) {
 	tests := []struct {
@@ -71,7 +128,8 @@ func TestHelloCommand(t *testing.T) {
 	}
 }
 
-func TestHelloCommandRunFunction(t *testing.T) {
+// TestHelloCommandRunE tests the command's RunE function directly
+func TestHelloCommandRunE(t *testing.T) {
 	tests := []struct {
 		name     string
 		flagName string
@@ -91,27 +149,22 @@ func TestHelloCommandRunFunction(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			// Capture stdout
-			oldStdout := os.Stdout
-			r, w, _ := os.Pipe()
-			os.Stdout = w
-
-			// Create a minimal command for testing the Run function directly
+			// Create a buffer to capture output
+			buf := &bytes.Buffer{}
+			
+			// Create a minimal command for testing the RunE function directly
 			cmd := &cobra.Command{}
+			cmd.SetOut(buf)
 			cmd.Flags().StringP("name", "n", tt.flagName, "Name to greet")
 			
-			// Call the Run function directly
-			helloCmd.Run(cmd, []string{})
-
-			// Restore stdout and read output
-			if err := w.Close(); err != nil {
-				t.Fatalf("Failed to close writer: %v", err)
+			// Call the RunE function directly
+			err := helloCmd.RunE(cmd, []string{})
+			if err != nil {
+				t.Errorf("RunE() error = %v", err)
 			}
-			os.Stdout = oldStdout
-			output, _ := io.ReadAll(r)
 
-			if string(output) != tt.expected {
-				t.Errorf("Expected output %q, got %q", tt.expected, string(output))
+			if got := buf.String(); got != tt.expected {
+				t.Errorf("Expected output %q, got %q", tt.expected, got)
 			}
 		})
 	}
