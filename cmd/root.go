@@ -48,5 +48,7 @@ func SetVersionInfo(version, commit, date string) {
 
 func init() {
 	// Version flag is now handled by Fang
+	// Version info is determined at runtime using runtime/debug.BuildInfo
+	// This allows automatic version detection from go.mod and git metadata
 }
 
