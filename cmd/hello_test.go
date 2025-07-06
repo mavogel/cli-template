@@ -54,7 +54,9 @@ func TestHelloCommand(t *testing.T) {
 			err := rootCmd.Execute()
 
 			// Restore stdout and read output
-			w.Close()
+			if err := w.Close(); err != nil {
+				t.Fatalf("Failed to close writer: %v", err)
+			}
 			os.Stdout = oldStdout
 			output, _ := io.ReadAll(r)
 
@@ -102,7 +104,9 @@ func TestHelloCommandRunFunction(t *testing.T) {
 			helloCmd.Run(cmd, []string{})
 
 			// Restore stdout and read output
-			w.Close()
+			if err := w.Close(); err != nil {
+				t.Fatalf("Failed to close writer: %v", err)
+			}
 			os.Stdout = oldStdout
 			output, _ := io.ReadAll(r)
 
