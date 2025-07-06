@@ -249,7 +249,7 @@ lint:
   - name: Set up Go
     uses: actions/setup-go@v5
     with:
-      go-version: 1.23.x
+      go-version: 1.24.x
   - name: golangci-lint
     uses: golangci/golangci-lint-action@v6
     with:
