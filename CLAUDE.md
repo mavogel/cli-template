@@ -80,7 +80,7 @@ func init() {
 ```
 
 ### Testing Pattern
-Tests use table-driven approach:
+Tests use a table-driven approach:
 ```go
 func TestNewCommand(t *testing.T) {
     tests := []struct {
@@ -119,7 +119,7 @@ Use conventional commits:
 - `feat:` New feature
 - `fix:` Bug fix
 - `docs:` Documentation changes
-- `style:` Code style changes (formatting, etc)
+- `style:` Code style changes (formatting, etc.)
 - `refactor:` Code refactoring
 - `test:` Test additions or changes
 - `chore:` Maintenance tasks
