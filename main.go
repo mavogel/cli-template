@@ -2,9 +2,10 @@
 package main
 
 import (
-	"fmt"
+	"context"
 	"os"
 
+	"github.com/charmbracelet/fang"
 	"github.com/mavogel/cli-template/cmd"
 )
 
@@ -16,8 +17,10 @@ var (
 
 func main() {
 	cmd.SetVersionInfo(version, commit, date)
-	if err := cmd.Execute(); err != nil {
-		fmt.Fprintln(os.Stderr, err)
+	if err := fang.Execute(
+		context.Background(),
+		cmd.RootCmd(),
+	); err != nil {
 		os.Exit(1)
 	}
 }
