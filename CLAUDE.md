@@ -53,52 +53,96 @@ The project follows standard Go CLI patterns with Cobra:
 - Each command has a corresponding `*_test.go` file
 
 ### Adding New Commands
-Create `cmd/newcommand.go`:
+Create `cmd/newcommand.go` following the pattern of separating business logic:
 ```go
 package cmd
 
 import (
     "fmt"
+    "io"
     "github.com/spf13/cobra"
 )
+
+// NewAction performs the core logic of the new command.
+// Separate this for better testability.
+func NewAction(param string, w io.Writer) error {
+    // Business logic here
+    _, err := fmt.Fprintf(w, "Result: %s\n", param)
+    return err
+}
 
 var newCmd = &cobra.Command{
     Use:   "new",
     Short: "Brief description",
     Long:  `Detailed description of the command.`,
     RunE: func(cmd *cobra.Command, args []string) error {
-        // Implementation
-        return nil
+        param, _ := cmd.Flags().GetString("param")
+        return NewAction(param, cmd.OutOrStdout())
     },
 }
 
 func init() {
     rootCmd.AddCommand(newCmd)
     // Add flags
-    newCmd.Flags().StringP("name", "n", "", "description")
+    newCmd.Flags().StringP("param", "p", "", "description")
 }
 ```
 
 ### Testing Pattern
-Tests use a table-driven approach:
+Tests use a table-driven approach with separate tests for action functions:
+
+1. **Test the action function directly** for unit testing:
 ```go
-func TestNewCommand(t *testing.T) {
+func TestNewAction(t *testing.T) {
     tests := []struct {
-        name    string
-        args    []string
-        wantErr bool
-        output  string
+        name     string
+        input    string
+        expected string
+        wantErr  bool
     }{
         {
-            name:   "valid input",
-            args:   []string{"--name", "test"},
-            output: "expected output",
+            name:     "valid input",
+            input:    "test",
+            expected: "Result: test\n",
+            wantErr:  false,
         },
     }
     
     for _, tt := range tests {
         t.Run(tt.name, func(t *testing.T) {
-            // Test implementation
+            buf := &bytes.Buffer{}
+            err := NewAction(tt.input, buf)
+            
+            if (err != nil) != tt.wantErr {
+                t.Errorf("NewAction() error = %v, wantErr %v", err, tt.wantErr)
+            }
+            
+            if got := buf.String(); got != tt.expected {
+                t.Errorf("NewAction() = %q, want %q", got, tt.expected)
+            }
+        })
+    }
+}
+```
+
+2. **Test the command integration** for end-to-end testing:
+```go
+func TestNewCommand(t *testing.T) {
+    tests := []struct {
+        name     string
+        args     []string
+        expected string
+    }{
+        {
+            name:     "with parameter",
+            args:     []string{"new", "--param", "test"},
+            expected: "Result: test\n",
+        },
+    }
+    
+    for _, tt := range tests {
+        t.Run(tt.name, func(t *testing.T) {
+            // Test command execution
         })
     }
 }
@@ -112,6 +156,7 @@ func TestNewCommand(t *testing.T) {
 4. **Testing**: Maintain >80% code coverage, write tests alongside implementation
 5. **Linting**: Code must pass all linters in `.golangci.yml`
 6. **Documentation**: Update command help text and docs/ when adding features
+7. **Command Structure**: Extract business logic into separate testable functions that accept `io.Writer` for output. This improves testability and separation of concerns.
 
 ## Commit Message Format
 

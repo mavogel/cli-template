@@ -69,6 +69,7 @@ func main() {
 - Example subcommand implementation
 - Demonstrates flag usage
 - Shows command structure patterns
+- Separates business logic into testable action functions
 
 ### Build Configuration
 

@@ -65,6 +65,55 @@ go tool cover -func=coverage.out
 
 ### Command Testing Pattern
 
+The testing approach separates business logic from command handling for better testability:
+
+#### 1. Action Function Testing
+
+Test the business logic directly:
+
+```go
+func TestHelloAction(t *testing.T) {
+    tests := []struct {
+        name     string
+        input    string
+        expected string
+        wantErr  bool
+    }{
+        {
+            name:     "default name",
+            input:    "",
+            expected: "Hello, World!\n",
+            wantErr:  false,
+        },
+        {
+            name:     "custom name",
+            input:    "Alice",
+            expected: "Hello, Alice!\n",
+            wantErr:  false,
+        },
+    }
+
+    for _, tt := range tests {
+        t.Run(tt.name, func(t *testing.T) {
+            buf := &bytes.Buffer{}
+            err := HelloAction(tt.input, buf)
+            
+            if (err != nil) != tt.wantErr {
+                t.Errorf("HelloAction() error = %v, wantErr %v", err, tt.wantErr)
+            }
+            
+            if got := buf.String(); got != tt.expected {
+                t.Errorf("HelloAction() = %q, want %q", got, tt.expected)
+            }
+        })
+    }
+}
+```
+
+#### 2. Command Integration Testing
+
+Test the full command execution:
+
 ```go
 func TestHelloCommand(t *testing.T) {
     tests := []struct {
@@ -74,43 +123,31 @@ func TestHelloCommand(t *testing.T) {
     }{
         {
             name:     "default greeting",
-            args:     []string{},
-            expected: "Hello, World!",
+            args:     []string{"hello"},
+            expected: "Hello, World!\n",
         },
         {
             name:     "custom name",
-            args:     []string{"--name", "Alice"},
-            expected: "Hello, Alice!",
+            args:     []string{"hello", "--name", "Alice"},
+            expected: "Hello, Alice!\n",
         },
     }
 
     for _, tt := range tests {
         t.Run(tt.name, func(t *testing.T) {
             buf := new(bytes.Buffer)
+            rootCmd := &cobra.Command{Use: "test"}
+            rootCmd.AddCommand(helloCmd)
+            rootCmd.SetOut(buf)
+            rootCmd.SetArgs(tt.args)
             
-            cmd := &cobra.Command{
-                Use: "hello",
-                Run: func(cmd *cobra.Command, args []string) {
-                    name, _ := cmd.Flags().GetString("name")
-                    if name == "" {
-                        name = "World"
-                    }
-                    cmd.Printf("Hello, %s!\n", name)
-                },
-            }
-            cmd.Flags().StringP("name", "n", "", "Name to greet")
-            
-            cmd.SetOut(buf)
-            cmd.SetArgs(tt.args)
-            
-            err := cmd.Execute()
+            err := rootCmd.Execute()
             if err != nil {
                 t.Errorf("Execute() error = %v", err)
             }
 
-            output := buf.String()
-            if output != tt.expected+"\n" {
-                t.Errorf("Expected output %q, got %q", tt.expected+"\n", output)
+            if got := buf.String(); got != tt.expected {
+                t.Errorf("Expected output %q, got %q", tt.expected, got)
             }
         })
     }

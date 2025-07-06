@@ -87,27 +87,68 @@ func ProcessData(input []byte) ([]byte, error) {
 }
 ```
 
+### Command Implementation
+
+When adding new commands:
+
+- **Separate business logic**: Extract core functionality into testable action functions
+- **Use RunE**: Prefer `RunE` over `Run` for proper error handling
+- **Accept io.Writer**: Action functions should accept `io.Writer` for output
+
+```go
+// Action function with business logic
+func MyAction(param string, w io.Writer) error {
+    _, err := fmt.Fprintf(w, "Result: %s\n", param)
+    return err
+}
+
+// Command definition
+var myCmd = &cobra.Command{
+    Use:   "mycommand",
+    Short: "Brief description",
+    RunE: func(cmd *cobra.Command, args []string) error {
+        param, _ := cmd.Flags().GetString("param")
+        return MyAction(param, cmd.OutOrStdout())
+    },
+}
+```
+
 ### Testing
 
 - **Test coverage**: Aim for 80%+ coverage
 - **Table-driven tests**: Use for multiple scenarios
 - **Test naming**: `TestFunctionName_Scenario`
 - **Mock external dependencies**: Use interfaces
+- **Test action functions directly**: Better unit testing
 
 ```go
-func TestProcessData_ValidInput(t *testing.T) {
+// Test action function
+func TestMyAction(t *testing.T) {
     tests := []struct {
         name     string
-        input    []byte
-        expected []byte
+        input    string
+        expected string
         wantErr  bool
     }{
-        // Test cases
+        {
+            name:     "valid input",
+            input:    "test",
+            expected: "Result: test\n",
+            wantErr:  false,
+        },
     }
     
     for _, tt := range tests {
         t.Run(tt.name, func(t *testing.T) {
-            // Test implementation
+            buf := &bytes.Buffer{}
+            err := MyAction(tt.input, buf)
+            
+            if (err != nil) != tt.wantErr {
+                t.Errorf("MyAction() error = %v, wantErr %v", err, tt.wantErr)
+            }
+            if got := buf.String(); got != tt.expected {
+                t.Errorf("MyAction() = %q, want %q", got, tt.expected)
+            }
         })
     }
 }
